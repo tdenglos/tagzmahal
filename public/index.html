@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Welcome to TagzMahal</title>
+    <title>TagzMahal</title>
     <link rel="shortcut icon" href="favicon.ico">
     <link rel="stylesheet" href="//cdn.rawgit.com/feathersjs/feathers-chat/v0.1.0/public/base.css">
     <link rel="stylesheet" href="//cdn.rawgit.com/feathersjs/feathers-chat/v0.1.0/public/chat.css">
@@ -16,7 +16,10 @@
       </div>
       <div class="row">
         <div class="col-12 col-6-tablet push-3-tablet col-4-desktop push-4-desktop text-center">
-          <form class="form" method="post" action="/testrun">
+          <form class="form" method="post" action="/testruns">
+            <fieldset>
+              <input class="block" type="run" name="run" placeholder="POC">
+            </fieldset>
             <button type="submit" class="button button-primary block login">
               Run
             </button>
