@@ -10,13 +10,10 @@ const myHook = options => { // always wrap in a function so you can pass options
     
     console.log('Launching phantomjs run...');
     const spawn = require('child_process').spawn;
+
+    const ls = spawn('phantomjs', ['web_clicker.js']);
+    //const ls = spawn('phantomjs', ['/Users/thomas/Documents/Startups/Automation/tagzmahal/git/web_clicker.js']);
     
-
-    const ls = spawn('phantomjs', ['/Users/thomas/Documents/Startups/Automation/tagzmahal/git/web_clicker.js']);
-    //const ls = spawn('phantomjs /Users/thomas/Documents/Startups/Automation/tagzmahal/git/web_clicker.js');
-
-    //const ls = spawn('ls', ['-lh', '/usr']);
-
     ls.stdout.on('data', (data) => {
       console.log(`${data}`);
     });
