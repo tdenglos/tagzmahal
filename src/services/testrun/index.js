@@ -12,23 +12,15 @@ class Service {
   }
 
   find(params) {
-
-    // TEST DE LOGGING SUR L'APPEL DU SERVICE
-    console.log('find request on testruns');
-    
     return Promise.resolve([]);
   }
-
+/*
   get(id, params) {
-    
-    // TEST DE LOGGING SUR L'APPEL DU SERVICE
-    console.log('GET request on testruns');
-
     return Promise.resolve({
       id, text: `A new message with ID: ${id}!`
     });
   }
-
+*/
   create(data, params) {
 
     // TEST DE LOGGING SUR L'APPEL DU SERVICE
@@ -40,7 +32,7 @@ class Service {
 
     return Promise.resolve(data);
   }
-
+/*
   update(id, data, params) {
     return Promise.resolve(data);
   }
@@ -52,7 +44,10 @@ class Service {
   remove(id, params) {
     return Promise.resolve({ id });
   }
+*/
+
 }
+
 
 module.exports = function(){
   const app = this;
