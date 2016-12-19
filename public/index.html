@@ -59,7 +59,7 @@
                           'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
                       }
                   };
-                  $.post('http://localhost:3030/testruns', data, config)
+                  $.post('/testruns', data, config)
                     .success(function (data) {
                       //$scope.runResponse = data;
                       runResults.innerHTML += data.runStatus ;
@@ -113,7 +113,7 @@
                           'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
                       }
                   };
-                  $.get('http://localhost:3030/runstatuses', data, config)
+                  $.get('/runstatuses', data, config)
                     .success(function (data) {
                       //$scope.runResponse = data;
                       for (var k in data){
