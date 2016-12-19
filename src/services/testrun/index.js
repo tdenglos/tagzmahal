@@ -23,14 +23,54 @@ class Service {
 */
   create(data, params) {
 
-    // TEST DE LOGGING SUR L'APPEL DU SERVICE
-    console.log('POST request on testruns');
-    
-    if(Array.isArray(data)) {
-      return Promise.all(data.map(current => this.create(current)));
-    }
+    // LOGGING SUR L'APPEL DU SERVICE
+    var key = data.timestamp.toString();
+    console.log('POST request on testruns - ' + key);
+    var runIndex = runList.length;
+    var newRun = {
+      id: key,
+      status: 'Queued'
+    };
+    runList.push(newRun) ; 
 
+    
+    var runLogs ='';
+
+    console.log('Launching phantomjs run...');
+    const spawn = require('child_process').spawn;
+
+    runList[runIndex].status = "Started";
+
+    const ls = spawn('phantomjs', ['web_clicker.js']);
+    //const ls = spawn('phantomjs', ['/Users/thomas/Documents/Startups/Automation/tagzmahal/git/web_clicker.js']);
+    
+    ls.stdout.on('data', (data) => {
+      console.log(`${data}`);
+      runLogs += `${data}`;
+    });
+
+    ls.stderr.on('data', (data) => {
+      console.log(`stderr: ${data}`);
+    });
+
+    ls.on('close', (code) => {
+      console.log(`child process exited with code ${code}`);
+      runList[runIndex].status = "Finished";
+    });
+
+
+
+
+    data.runStatus = 'Run queued with ID ' + data.timestamp + ' for user ' + data.user;
+    data.runLogs = runLogs;
+    //console.log(runLogs);
+
+
+    if(Array.isArray(data)) {
+     return Promise.all(data.map(current => this.create(current)));
+    }
     return Promise.resolve(data);
+
   }
 /*
   update(id, data, params) {
