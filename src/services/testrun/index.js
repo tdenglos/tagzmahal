@@ -28,6 +28,7 @@ class Service {
     console.log('POST request on testruns - ' + key);
     var runIndex = runList.length;
     var newRun = {
+      rank: runIndex,
       id: key,
       status: 'Queued'
     };
@@ -56,6 +57,13 @@ class Service {
     ls.on('close', (code) => {
       console.log(`child process exited with code ${code}`);
       runList[runIndex].status = "Finished";
+      var newRun = {
+        id: key,
+        output: runLogs
+      };
+      runOutputs.push(newRun) ; 
+      console.log(runLogs);
+      
     });
 
 

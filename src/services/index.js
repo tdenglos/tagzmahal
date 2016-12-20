@@ -1,4 +1,5 @@
 'use strict';
+const runoutput = require('./runoutput');
 const runstatus = require('./runstatus');
 const testrun = require('./testrun');
 const authentication = require('./authentication');
@@ -12,4 +13,5 @@ module.exports = function() {
   app.configure(user);
   app.configure(testrun);
   app.configure(runstatus);
+  app.configure(runoutput);
 };

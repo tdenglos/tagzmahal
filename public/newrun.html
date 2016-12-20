@@ -1,0 +1,77 @@
+<html>
+  
+  <head>
+    <title>TagzMahal</title>
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="stylesheet" href="//cdn.rawgit.com/feathersjs/feathers-chat/v0.1.0/public/base.css">
+    <link rel="stylesheet" href="//cdn.rawgit.com/feathersjs/feathers-chat/v0.1.0/public/chat.css">
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+  </head>
+  
+  <body> 
+
+    <p></p>
+
+    <center><a href='index.html'><img class="logo" src='./tagzmahal_logo.png' height='40px'></a></center>
+
+    <main class="login container" style="padding-top: 10px;">
+      
+      <div class="row">
+
+        <div class="col-12 col-6-tablet push-3-tablet col-4-desktop push-4-desktop text-center">
+          <h1 class="font-100">New run</h1>
+   
+          <input type="button" class="button button-primary block login" value="Run" id="poke" />
+          <p></p>
+          <textarea id="runResults" style="width: 100%; height: 60px;">Please give an insruction.</textarea>
+          <br><br><br>
+          <a href='dashboard.html'>
+            <input type="button" class="button" value="Check my dashboard" id="dashboard_button" />
+          </a>
+
+
+          <script>
+              $('#poke').click(function () {
+                  var runResults = document.getElementById("runResults");
+                  var timestamp = Date.now();
+                  var user = 'Anonymous';
+                  runResults.innerHTML += "\n---\nRequest for run sent with ID " + timestamp + "\n";
+                  var data = $.param({
+                      timestamp: timestamp,
+                      user: user
+                  });         
+                  var config = {
+                      headers : {
+                          'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
+                      }
+                  };
+                  $.post('/testruns', data, config)
+                    .success(function (data) {
+                      //$scope.runResponse = data;
+                      runResults.innerHTML += data.runStatus ;
+                      runResults.scrollTop = runResults.scrollHeight;
+                    }).error(
+                      function (data, status, header, config) {
+                        runResults.innerHTML = 'Error';
+                      }
+                    )
+                  ;
+              })
+
+
+
+          </script>
+
+
+
+
+        </div>
+      </div>
+    </main>
+
+  </body>
+
+</html>
+
+
+
