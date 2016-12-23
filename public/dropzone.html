@@ -5,6 +5,9 @@
 
         <link rel="stylesheet" href="./assets/dropzone.css">
         <script src="./assets/dropzone.js"></script>
+        
+        <link rel="stylesheet" href="//cdn.rawgit.com/feathersjs/feathers-chat/v0.1.0/public/base.css">
+        <link rel="stylesheet" href="//cdn.rawgit.com/feathersjs/feathers-chat/v0.1.0/public/chat.css">
 
         <script type="text/javascript" src="socket.io/socket.io.js"></script>
         <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/core-js/2.1.4/core.min.js"></script>
@@ -36,9 +39,32 @@
         </script>
     </head>
     <body>
-        <h1>Let's upload some files!</h1>
-        <form action="/uploads"
-          class="dropzone"
-          id="my-awesome-dropzone"></form>
+        <p></p>
+
+        <center><a href='index.html'><img class="logo" src='./tagzmahal_logo.png' height='40px'></a></center>
+
+
+        <main class="login container" style="padding-top: 10px;">
+          
+          <div class="row">
+
+            <div class="col-12 col-6-tablet push-3-tablet col-4-desktop push-4-desktop text-center">
+
+              <h1 class="font-100">Let's upload some files!</h1>
+
+
+                <form action="/uploads"
+                  class="dropzone"
+                  id="my-awesome-dropzone"></form>
+
+            </div>
+          </div>
+        </main>
+
+
+
+
+
+
     </body>
 </html>
