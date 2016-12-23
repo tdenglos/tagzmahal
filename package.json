@@ -36,7 +36,12 @@
     "nedb": "^1.8.0",
     "passport": "^0.3.2",
     "serve-favicon": "^2.3.2",
-    "winston": "^2.3.0"
+    "winston": "^2.3.0",
+    
+    "fs-blob-store": "^5.2.1",
+    "dauria": "^1.1.4",
+    "feathers-blob": "^1.0.5",
+    "multer": "^1.1.0"
   },
   "devDependencies": {
     "jshint": "^2.9.4",

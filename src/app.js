@@ -15,8 +15,8 @@ const middleware = require('./middleware');
 const services = require('./services');
 
 
-
 const app = feathers();
+
 
 app.configure(configuration(path.join(__dirname, '..')));
 
@@ -35,8 +35,10 @@ app.use(compress())
 
 module.exports = app;
 
+
+
+// Déclaration des variables que j'utilise pour les ws
+
 global.runList = [];
 global.runOutputs = [];
-
-
 

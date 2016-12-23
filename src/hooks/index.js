@@ -11,3 +11,18 @@ exports.myHook = function(options) {
     console.log('My custom global hook ran. Feathers is awesome!');
   };
 };
+
+
+
+////////////////////////////
+////////////////////////////
+// Ajout pour le POC excelJS
+////////////////////////////
+////////////////////////////
+exports.exceljsPOC = function(options){
+	return function(hook) {
+		
+	};
+}
+
+		

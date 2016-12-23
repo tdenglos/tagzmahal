@@ -1,4 +1,5 @@
 'use strict';
+const upload = require('./upload');
 const runoutput = require('./runoutput');
 const runstatus = require('./runstatus');
 const testrun = require('./testrun');
@@ -14,4 +15,5 @@ module.exports = function() {
   app.configure(testrun);
   app.configure(runstatus);
   app.configure(runoutput);
+  app.configure(upload);
 };

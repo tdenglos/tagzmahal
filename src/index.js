@@ -9,6 +9,17 @@ server.on('listening', () =>
 );
 
 
+
+
+
+
+////////////////////////////
+////////////////////////////
+// Ajout pour le POC excelJS
+////////////////////////////
+////////////////////////////
+
+
 var Excel = require('exceljs');
 
 // read from a file 
@@ -29,6 +40,5 @@ workbook.xlsx.readFile('./src/middleware/input_short.xlsx')
 		dobCol.eachCell(function(cell, rowNumber) {
 		    console.log(cell.value);
 		});
-
-
     });
+
