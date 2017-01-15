@@ -1,0 +1,98 @@
+<html>
+  
+  <head>
+    <title>TagzMahal</title>
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="stylesheet" href="//cdn.rawgit.com/feathersjs/feathers-chat/v0.1.0/public/base.css">
+    <link rel="stylesheet" href="//cdn.rawgit.com/feathersjs/feathers-chat/v0.1.0/public/chat.css">
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+
+
+    <script type="text/javascript" src="//unpkg.com/feathers-client@^1.0.0/dist/feathers.js"></script>
+    <script type="text/javascript">
+      var host = 'http://localhost:3030';
+      var userName;
+      var userPic;
+
+      // Set up Feathers client side
+      var app = feathers()
+        .configure(feathers.rest(host).jquery(jQuery))
+        .configure(feathers.hooks())
+        .configure(feathers.authentication({ storage: window.localStorage }));
+
+      // authenticate using your JWT that was passed in the short lived cookie
+      app.authenticate().then(function(result){
+        console.log('Authenticated!', result);
+        userName = JSON.parse(JSON.stringify(result)).data.github.login;
+//        alert(userName);
+
+        //alert('Your JWT is: ' + app.get('token'));
+  
+      });
+  /*    .catch(function(error){
+        console.error('Error authenticating!', error);
+      });
+*/
+      $('#logout').on('click', function(ev) {
+        app.logout();
+      });
+
+    </script>
+
+
+
+  </head>
+  
+  <body> 
+
+    <p></p>
+
+    <center>
+      <a href='home.html'><img class="logo" src='./tagzmahal_logo.png' height='40px'></a><br>
+      <a href="/" id="logout">Logout</a>
+                <br><br>
+          <a href="/private/coucou.html">Go directly to private section</a>
+    </center>
+
+    <main class="login container" style="padding-top: 10px;">
+      
+      <div class="row">
+
+        <div class="col-12 col-6-tablet push-3-tablet col-4-desktop push-4-desktop text-center">
+
+          <h1 class="font-100">Your are logged in
+            <script>//document.write(userName);</script>
+
+          !</h1>
+
+
+          <a href='/private/home'>
+            <input type="button" class="button button-primary block login" value="Go to my workspace" id="dashboard_button" />
+          </a>
+
+        </div>
+      </div>
+    </main>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-28382926-2', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+
+
+
+
+  </body>
+
+</html>
+
+
+
