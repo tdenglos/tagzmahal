@@ -7,11 +7,13 @@
     <link rel="stylesheet" href="//cdn.rawgit.com/feathersjs/feathers-chat/v0.1.0/public/chat.css">
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 
-
+<!--
     <script type="text/javascript" src="//unpkg.com/feathers-client@^1.0.0/dist/feathers.js"></script>
+  -->
     <script type="text/javascript">
-      //var host = 'http://localhost:3030';
-      var host = 'http://www.tagzmahal.com';
+/*
+      var host = 'http://localhost:3030';
+      //var host = 'http://www.tagzmahal.com';
       var userName;
       var userPic;
 
@@ -24,20 +26,23 @@
       // authenticate using your JWT that was passed in the short lived cookie
       app.authenticate().then(function(result){
         console.log('Authenticated!', result);
-        userName = JSON.parse(JSON.stringify(result)).data.github.login;
+        //userName = JSON.parse(JSON.stringify(result)).data.github.login;
 //        alert(userName);
 
         //alert('Your JWT is: ' + app.get('token'));
+
   
       });
+*/
   /*    .catch(function(error){
         console.error('Error authenticating!', error);
       });
 */
+/*
       $('#logout').on('click', function(ev) {
         app.logout();
       });
-
+*/
     </script>
 
 
@@ -49,10 +54,9 @@
     <p></p>
 
     <center>
-      <a href='home.html'><img class="logo" src='./tagzmahal_logo.png' height='40px'></a><br>
-      <a href="/" id="logout">Logout</a>
-                <br><br>
-          <a href="/private/coucou.html">Go directly to private section</a>
+      <a href='/private/home'><img class="logo" src='./tagzmahal_logo.png' height='40px'></a><br>
+      <a href="/logout" id="logout">Logout</a>
+                
     </center>
 
     <main class="login container" style="padding-top: 10px;">
