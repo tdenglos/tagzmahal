@@ -70,8 +70,12 @@ app.use(compress())
 ////// Nouvelle facon en utilisant directement passport
 
 passport.use(new GithubStrategy({
-    clientID: "c0760198143c262b0cc3",
-    clientSecret: "653b935888839573fc0fb42538615033f041ced0",
+    // DEV CONF
+    //clientID: "c0760198143c262b0cc3",
+    //clientSecret: "653b935888839573fc0fb42538615033f041ced0",
+    // PRODUCTION CONF
+  clientID: '36b9ce352600f99c1569',
+  clientSecret: '190d22c079a92c0ef333b149cd0460255b12714e',
     callbackURL: "/auth/github/callback"
   },
   function(accessToken, refreshToken, profile, done) {
