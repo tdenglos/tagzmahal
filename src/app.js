@@ -22,6 +22,7 @@ const authenticationHooks = require('feathers-authentication').hooks
 // Passport Auth Strategies
 var passport = require('passport');
 var GithubStrategy = require('passport-github').Strategy;
+var GoogleStrategy = require('passport-google-oauth20').Strategy;
 var session = require('express-session');
 // Initialize the application
 const app = feathers();
@@ -71,17 +72,44 @@ app.use(compress())
 
 passport.use(new GithubStrategy({
     // DEV CONF
-    //clientID: "c0760198143c262b0cc3",
-    //clientSecret: "653b935888839573fc0fb42538615033f041ced0",
+    clientID: "c0760198143c262b0cc3",
+    clientSecret: "653b935888839573fc0fb42538615033f041ced0",
     // PRODUCTION CONF
-  clientID: '36b9ce352600f99c1569',
-  clientSecret: '190d22c079a92c0ef333b149cd0460255b12714e',
+ // clientID: '36b9ce352600f99c1569',
+  //clientSecret: '190d22c079a92c0ef333b149cd0460255b12714e',
     callbackURL: "/auth/github/callback"
   },
   function(accessToken, refreshToken, profile, done) {
     return done(null, profile);
   }
 ));
+
+
+passport.use(new GoogleStrategy({
+    // DEV CONF
+    clientID: "285026965780-1vd3tcksdd85rqm2pg18lkvtnfbmemcb.apps.googleusercontent.com",
+    clientSecret: "pwQV_wYmP_65xusaJ0ODD8yh",
+    /*
+    // PRODUCTION CONF
+    clientID: "285026965780-1vd3tcksdd85rqm2pg18lkvtnfbmemcb.apps.googleusercontent.com",
+    clientSecret: "pwQV_wYmP_65xusaJ0ODD8yh",
+    */
+    callbackURL: "/auth/google/callback"
+  },
+  function(accessToken, refreshToken, profile, cb) {
+    console.log('using google passport');
+    return cb(null, profile);
+/*
+    User.findOrCreate({ googleId: profile.id }, function (err, user) {
+      return cb(err, user);
+    });
+*/
+
+  }
+));
+
+
+
 
 
 // Express and Passport Session
@@ -117,8 +145,15 @@ app.use(function(req, res, next) {
 app.use('/', serveStatic( app.get('public') ));
 //app.use('/', feathers.static(__dirname + '/public'));
 
+
+
+
+
+/*
+
 // we will call this to start the GitHub Login process
-app.get('/auth/github', passport.authenticate('github'));
+app.get('/auth/github', 
+  passport.authenticate('github', { scope: ['user:email'] }));
 
 // GitHub will call this URL
 app.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/' }),
@@ -126,6 +161,20 @@ app.get('/auth/github/callback', passport.authenticate('github', { failureRedire
     res.redirect('/successful_login.html');
   }
 );
+*/
+
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['email profile'] }));
+
+app.get('/auth/google/callback', 
+  passport.authenticate('google', { failureRedirect: '/' }),
+  function(req, res) {
+    // Successful authentication, redirect home.
+    res.redirect('/successful_login.html');
+  });
+
+
+
 
 app.get('/logout', function(req, res){
   console.log('logging out');
@@ -133,111 +182,37 @@ app.get('/logout', function(req, res){
   res.redirect('/');
 });
 ////////////////////
-/*
-// required for passport session
-app.use(session({
-  resave: true, 
-  saveUninitialized: true, 
-  secret: 'SOMERANDOMSECRETHERE', 
-  cookie: { maxAge: 60000 }
-}));
-
-app.use(session({
-  secret: 'secrettexthere',
-  saveUninitialized: true,
-  resave: true,
-  // using store session on MongoDB using express-session + connect
-  store: new MongoStore({
-    url: config.urlMongo,
-    collection: 'sessions'
-  })
-}));
 
 
-
-// Init passport authentication 
-app.use(passport.initialize());
-// persistent login sessions 
-app.use(passport.session());
-*/
-
-/*
-
-app.get('/auth/github',
-  passport.authenticate('github'));
-
-app.get('/auth/github/callback', 
-  passport.authenticate('github', { failureRedirect: '/login' }),
-  function(req, res) {
-    // Successful authentication, redirect home.
-    res.redirect('/');
+//  app.use(errorHandler());
+  
+  app.use(function(err, req, res, next) {
+    console.error(err.stack);
+    //res.status(500).send('Something broke!');
   });
 
-*/
-
-
-
-/*
-  // Set up our own custom redirect route for successful login
-  app.get('/auth/success', function(req, res){
-    //res.redirect('/home.html');
-    console.log('user logged in');
-    res.sendFile(path.resolve(__dirname, '..', 'private', 'home.html'));
-   // console.log(path.resolve(__dirname, '..', 'public', 'success.html'));
-  });
-*/
-  app.use(errorHandler());
 
 
 
 
 // Require user to be authenticated to access pages under "/private/"
-
-
 function requireLogin(req, res, next) {
   console.log('requireLogin is called');
   console.log (req.isAuthenticated());
   if (req.isAuthenticated()){
     console.log("authenticated");
+   // console.log(req.user);
+    console.log(req.user.emails[0].value);
+
     next();
   }else{
     console.log("not authenticated");
     res.redirect('/?error=not_registered_as_alpha_tester');
   }
 
-
-  /*
-  console.log(req.feathers.token);
-  console.log(authenticationHooks.verifyToken());
-  console.log(authenticationHooks.restrictToAuthenticated());
-  if ( authenticationHooks.restrictToAuthenticated() instanceof Error ) {
-    console.log('error');
-    res.redirect('/');
-  }else{
-    console.log('success');
-    next();
-  }
-*/
-
-
-
-/*
-      console.log(req);
-  console.log('requireLogin is called');
-  if (req.session.loggedIn) {
-
-    console.log('OK, user is logged in');
-    next(); // allow the next route to run
-  } else {
-    console.log('User is not logged in');
-    // require the user to log in
-    res.redirect("/"); // or render a form, etc.
-  }
-*/
 }
 
-//app.use('/private', feathers.static(__dirname + '/private'));
-//app.get('/private/home', requireLogin, feathers.static(__dirname + '/public/private/home.html'));
+
 app.all('/private/home', requireLogin, function(req, res, next){
   res.sendFile(path.resolve(__dirname,'..', 'public', 'private', 'home.html'));
   }
@@ -267,12 +242,6 @@ app.all("/privateservices/*", requireLogin, function(req, res, next) {
 });
 
 
-/*
-app.get("/admin/posts", function(req, res) {
-  // if we got here, the `app.all` call above has already
-  // ensured that the user is logged in
-});
-*/
 
 
 
