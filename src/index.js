@@ -2,7 +2,15 @@
 
 const app = require('./app');
 const port = app.get('port');
+
+const https = require('https');
+const fs = require('fs');
 const server = app.listen(port);
+
+https.createServer({
+  key: fs.readFileSync('key.pem'),
+  cert: fs.readFileSync('cert.pem')
+}, app).listen(1443);
 
 server.on('listening', () =>
   console.log(`Feathers application started on ${app.get('host')}:${port}`)

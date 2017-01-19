@@ -1,5 +1,6 @@
 'use strict';
 
+
 const path = require('path');
 const serveStatic = require('feathers').static;
 const favicon = require('serve-favicon');
@@ -132,7 +133,7 @@ passport.deserializeUser(function(user, done) {
   done(null, user);
 });
 
-
+// redirect www
 app.use(function(req, res, next) {
  console.log('testing www');
  if(/^www\./.test(req.headers.host)) {
@@ -143,17 +144,29 @@ app.use(function(req, res, next) {
 });
 
 
+// set up a route to redirect http to https
+app.use(function(req, res, next){
+  console.log('checking https');
+  if(req.protocol=="http"){
+    res.redirect('https://'+req.hostname+":1443"+req.url);
+  }else{
+    next();
+  }
+    
+});
 
 
+// protect urls in /private folder
 app.use(function(req, res, next) {
-    console.log('private filter');
+    console.log('checking authentication status');
     console.log(req.isAuthenticated());
     console.log(req.path.indexOf('/private'));
     if (req.isAuthenticated() == false && req.path.indexOf('/private') === 0)
     {
-        res.redirect('/?error=not_registered_as_alpha_tester');
+        res.redirect('/?error=not_authenticated');
+    }else{
+      next();  
     }
-    next(); 
 });
 
 app.use('/', serveStatic( app.get('public') ));
@@ -210,6 +223,7 @@ app.get('/logout', function(req, res){
 
 // Require user to be authenticated to access pages under "/private/"
 function requireLogin(req, res, next) {
+  /*
   console.log('requireLogin is called');
   console.log (req.isAuthenticated());
   if (req.isAuthenticated()){
@@ -222,8 +236,10 @@ function requireLogin(req, res, next) {
     console.log("not authenticated");
     res.redirect('/?error=not_registered_as_alpha_tester');
   }
-
+*/
+  next();
 }
+
 
 
 app.all('/private/home', requireLogin, function(req, res, next){
