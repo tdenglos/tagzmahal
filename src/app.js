@@ -132,6 +132,19 @@ passport.deserializeUser(function(user, done) {
   done(null, user);
 });
 
+
+app.use(function(req, res, next) {
+ console.log('testing www');
+ if(/^www\./.test(req.headers.host)) {
+  res.redirect(req.protocol + '://' + req.headers.host.replace(/^www\./,'') + req.url,301);
+ } else {
+  next();
+ }
+});
+
+
+
+
 app.use(function(req, res, next) {
     console.log('private filter');
     console.log(req.isAuthenticated());
@@ -145,19 +158,6 @@ app.use(function(req, res, next) {
 
 app.use('/', serveStatic( app.get('public') ));
 //app.use('/', feathers.static(__dirname + '/public'));
-
-
-
-
-
-app.all('/*', function(req, res, next) {
- if(/^www\./.test(req.headers.host)) {
-  res.redirect(req.protocol + '://' + req.headers.host.replace(/^www\./,'') + req.url,301);
- } else {
-  next();
- }
-});
-
 
 
 
