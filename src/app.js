@@ -68,6 +68,7 @@ app.use(compress())
   //.use('/', feathers.static(__dirname + '/public'));
 
 
+
 ////// Nouvelle facon en utilisant directement passport
 
 passport.use(new GithubStrategy({
@@ -144,6 +145,18 @@ app.use(function(req, res, next) {
 
 app.use('/', serveStatic( app.get('public') ));
 //app.use('/', feathers.static(__dirname + '/public'));
+
+
+
+
+
+app.all('/*', function(req, res, next) {
+ if(/^www\./.test(req.headers.host)) {
+  res.redirect(req.protocol + '://' + req.headers.host.replace(/^www\./,'') + req.url,301);
+ } else {
+  next();
+ }
+});
 
 
 
