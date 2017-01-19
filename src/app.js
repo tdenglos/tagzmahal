@@ -148,7 +148,7 @@ app.use(function(req, res, next) {
 app.use(function(req, res, next){
   console.log('checking https');
   if(req.protocol=="http"){
-    res.redirect('https://'+req.hostname+":1443"+req.url);
+    res.redirect('https://'+req.hostname+req.url);
   }else{
     next();
   }
