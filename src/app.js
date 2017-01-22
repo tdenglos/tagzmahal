@@ -25,6 +25,26 @@ var passport = require('passport');
 var GithubStrategy = require('passport-github').Strategy;
 var GoogleStrategy = require('passport-google-oauth20').Strategy;
 var session = require('express-session');
+
+var MongoClient = require('mongodb').MongoClient;
+var db;
+MongoClient.connect('mongodb://tagzmahal-app:tagzmahal-app@ds117199.mlab.com:17199/tagzmahal-beta', function(err, database) {
+  if (err) {
+    throw err;
+  }
+  db = database ;
+  
+  db.collection('beta-testers').find().toArray(function(err, result) {
+    if (err) {
+      throw err;
+    }
+    console.log(result);
+  });
+});
+
+
+
+
 // Initialize the application
 const app = feathers();
 
@@ -71,7 +91,7 @@ app.use(compress())
 
 
 ////// Nouvelle facon en utilisant directement passport
-
+/*
 passport.use(new GithubStrategy({
     // DEV CONF
     clientID: "c0760198143c262b0cc3",
@@ -85,7 +105,7 @@ passport.use(new GithubStrategy({
     return done(null, profile);
   }
 ));
-
+*/
 
 passport.use(new GoogleStrategy({
     // DEV CONF
@@ -196,7 +216,21 @@ app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
   function(req, res) {
     // Successful authentication, redirect home.
-    res.redirect('/successful_login.html');
+    var requesterEmail = req.user.emails[0].value ;
+    
+    db.collection('beta-testers').find({"email" : requesterEmail}).toArray(function(err, result) {
+      if (err) {
+        throw err;
+      }
+      console.log(result);
+      console.log(result.length);
+      if(result.length > 0){
+        res.redirect('/successful_login.html');    
+      }else{
+        req.logout();
+        res.redirect('/become_beta_tester.html');  
+      }      
+    });
   });
 
 
