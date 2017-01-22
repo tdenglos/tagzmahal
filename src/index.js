@@ -8,8 +8,12 @@ const fs = require('fs');
 const server = app.listen(port);
 
 https.createServer({
-  key: fs.readFileSync('key.pem'),
-  cert: fs.readFileSync('cert.pem')
+  //DEV
+  	//key: fs.readFileSync('key.pem'),
+  	//cert: fs.readFileSync('cert.pem')
+  //PROD
+	key: fs.readFileSync('key_name.key'),
+	cert: fs.readFileSync('tagzmahal-com.cer')
 }, app).listen(1443);
 
 server.on('listening', () =>
