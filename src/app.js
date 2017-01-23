@@ -27,6 +27,7 @@ var GoogleStrategy = require('passport-google-oauth20').Strategy;
 var session = require('express-session');
 
 var MongoClient = require('mongodb').MongoClient;
+var ObjectId = require('mongodb').ObjectID;
 var db;
 MongoClient.connect('mongodb://tagzmahal-app:tagzmahal-app@ds117199.mlab.com:17199/tagzmahal-beta', function(err, database) {
   if (err) {
@@ -38,6 +39,7 @@ MongoClient.connect('mongodb://tagzmahal-app:tagzmahal-app@ds117199.mlab.com:171
     if (err) {
       throw err;
     }
+    console.log("beta testers :");
     console.log(result);
   });
 });
@@ -153,9 +155,14 @@ passport.deserializeUser(function(user, done) {
   done(null, user);
 });
 
+
+//////////////////////
+// REDIRECTIONS
+//////////////////////
+
 // redirect www
 app.use(function(req, res, next) {
- console.log('testing www');
+ //console.log('testing www');
  if(/^www\./.test(req.headers.host)) {
   res.redirect(req.protocol + '://' + req.headers.host.replace(/^www\./,'') + req.url,301);
  } else {
@@ -166,7 +173,7 @@ app.use(function(req, res, next) {
 
 // set up a route to redirect http to https
 app.use(function(req, res, next){
-  console.log('checking https');
+  //console.log('checking https');
   if(req.protocol=="http"){
     res.redirect('https://'+req.hostname+req.url);
   }else{
@@ -176,11 +183,17 @@ app.use(function(req, res, next){
 });
 
 
+//////////////////////
+// SECURITY
+//////////////////////
+
+
+
 // protect urls in /private folder
 app.use(function(req, res, next) {
-    console.log('checking authentication status');
-    console.log(req.isAuthenticated());
-    console.log(req.path.indexOf('/private'));
+    //console.log('checking authentication status');
+    //console.log(req.isAuthenticated());
+    //console.log(req.path.indexOf('/private'));
     if (req.isAuthenticated() == false && req.path.indexOf('/private') === 0)
     {
         res.redirect('/?error=not_authenticated');
@@ -191,8 +204,6 @@ app.use(function(req, res, next) {
 
 app.use('/', serveStatic( app.get('public') ));
 //app.use('/', feathers.static(__dirname + '/public'));
-
-
 
 
 /*
@@ -225,7 +236,8 @@ app.get('/auth/google/callback',
       console.log(result);
       console.log(result.length);
       if(result.length > 0){
-        res.redirect('/successful_login.html');    
+        res.redirect('/private/home.html');    
+        //res.redirect('/successful_login.html');    
       }else{
         req.logout();
         res.redirect('/become_beta_tester.html');  
@@ -237,7 +249,7 @@ app.get('/auth/google/callback',
 
 
 app.get('/logout', function(req, res){
-  console.log('logging out');
+  //console.log('logging out');
   req.logout();
   res.redirect('/');
 });
@@ -250,9 +262,6 @@ app.get('/logout', function(req, res){
     console.error(err.stack);
     //res.status(500).send('Something broke!');
   });
-
-
-
 
 
 // Require user to be authenticated to access pages under "/private/"
@@ -274,7 +283,9 @@ function requireLogin(req, res, next) {
   next();
 }
 
-
+//////////////////////
+// PAGES
+//////////////////////
 
 app.all('/private/home', requireLogin, function(req, res, next){
   res.sendFile(path.resolve(__dirname,'..', 'public', 'private', 'home.html'));
@@ -305,13 +316,73 @@ app.all("/privateservices/*", requireLogin, function(req, res, next) {
 });
 
 
+//////////////////////
+// SERVICES
+//////////////////////
+
+// List all run configurations of a user
+app.get('/privateservices/run-configurations', function(req, res){
+  var requesterEmail = req.user.emails[0].value ;
+  console.log('asking run conf list for ' + requesterEmail);
+  db.collection('run-configurations').find({"owner" : requesterEmail}).toArray(function(err, result) {
+    if (err) {
+      throw err;
+    }
+    res.send(result);
+  });
+});
+
+// delete a run configuration
+app.get('/privateservices/run-configurations/delete', function(req, res){
+  var requesterEmail = req.user.emails[0].value ;
+  var runId = req.query.runId ;
+  console.log('asking run conf delete for ' + requesterEmail + ' for run ' + runId );    
+  var condition = {"_id" : new ObjectId(runId), "owner" : requesterEmail};
+/*  db.collection('run-configurations').find(condition).toArray(function(err, result) {
+    if (err) {
+      throw err;
+    }
+    console.log(result);
+    res.send(result);
+  }); */
+  db.collection('run-configurations').deleteOne(condition);
+  res.send("done");
+});
+
+// add a co-owner to a run configuration
+app.get('/privateservices/run-configurations/add-co-owner', function(req, res){
+  var requesterEmail = req.user.emails[0].value ;
+  var coOwnerEmail = req.query.coOwnerEmail ;
+  var runId = req.query.runId ;
+  console.log('asking co-owner add for ' + requesterEmail + ' for run ' + runId + ' for co-owner ' + coOwnerEmail );
+  res.send(coOwnerEmail + "add as co-owner");
+});
+
+// see summary of run statuses of a user
+app.get('/privateservices/runs', function(req, res){
+  var requesterEmail = req.user.emails[0].value ;
+  console.log('asking run statuses list for ' + requesterEmail);
+  db.collection('runs').find({"owner" : requesterEmail}).toArray(function(err, result) {
+    if (err) {
+      throw err;
+    }
+    res.send(result);
+  });
+});
+
+// delete a run
+app.get('/privateservices/runs/delete', function(req, res){
+  var requesterEmail = req.user.emails[0].value ;
+  var runId = req.query.runId ;
+  console.log('asking run delete for ' + requesterEmail + ' for run ' + runId );
+  res.send("done");
+});
 
 
 
-
-
-
-
+//////////////////////
+// LAUNCH
+//////////////////////
 
 module.exports = app;
 
