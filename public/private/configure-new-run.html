@@ -27,24 +27,19 @@
 -->
       <div class="text-center" style="margin: 100px">
 
-          <h1 class="font-100">What do you want to do?</h1>
-<!--
-          <a href='/private/dashboard.html'>
-            <input type="button" class="button button-primary block login" value="See my dashboard" id="dashboard_button" />
-          </a>
- -->         
-          <a href='/private/run-configurations.html'>
-            <input type="button" class="button button-primary block login" value="Manage existing run configurations" id="newrun_button" />
-          </a>
-<!--          
-          <a href='/private/newrun.html'>
-            <input type="button" class="button button-primary block login" value="Setup a new run" id="newrun_button" />
-          </a>
--->
-          <a href='/private/configure-new-run.html'>
-            <input type="button" class="button button-primary block login" value="Configure a new run" id="newrun_button" />
-          </a>
-
+          <h1 class="font-100">Upload a run configuration</h1>
+            
+            <form ref='uploadForm' 
+              id='uploadForm' 
+              action='/privateservices/run-configurations/upload' 
+              method='post' 
+              encType="multipart/form-data">
+                Website: <br><input type="text" name="website" required><br><br>
+                Description: <br><input type="text" name="description" required><br><br>
+                <input type="file" name="runConfigurationFile" required/><br><br>
+                <input type='submit' value='Upload!' />
+            
+            </align>
         </div>
       </div>
     </main>

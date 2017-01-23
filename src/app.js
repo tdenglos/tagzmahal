@@ -26,6 +26,10 @@ var GithubStrategy = require('passport-github').Strategy;
 var GoogleStrategy = require('passport-google-oauth20').Strategy;
 var session = require('express-session');
 
+var Excel = require('exceljs');
+var fileUpload = require('express-fileupload');
+const fs = require('fs');
+
 var MongoClient = require('mongodb').MongoClient;
 var ObjectId = require('mongodb').ObjectID;
 var db;
@@ -44,8 +48,10 @@ MongoClient.connect('mongodb://tagzmahal-app:tagzmahal-app@ds117199.mlab.com:171
   });
 });
 
+////// TEST AREA
 
 
+////////
 
 // Initialize the application
 const app = feathers();
@@ -90,6 +96,7 @@ app.use(compress())
   //.use('/private', feathers.static(__dirname + '/private'))
   //.use('/', feathers.static(__dirname + '/public'));
 
+app.use(fileUpload());
 
 
 ////// Nouvelle facon en utilisant directement passport
@@ -233,8 +240,8 @@ app.get('/auth/google/callback',
       if (err) {
         throw err;
       }
-      console.log(result);
-      console.log(result.length);
+      //console.log(result);
+      //console.log(result.length);
       if(result.length > 0){
         res.redirect('/private/home.html');    
         //res.redirect('/successful_login.html');    
@@ -286,7 +293,7 @@ function requireLogin(req, res, next) {
 //////////////////////
 // PAGES
 //////////////////////
-
+/*
 app.all('/private/home', requireLogin, function(req, res, next){
   res.sendFile(path.resolve(__dirname,'..', 'public', 'private', 'home.html'));
   }
@@ -314,7 +321,7 @@ app.all("/privateservices/*", requireLogin, function(req, res, next) {
   next(); // if the middleware allowed us to get here,
           // just move on to the next route handler
 });
-
+*/
 
 //////////////////////
 // SERVICES
@@ -323,7 +330,7 @@ app.all("/privateservices/*", requireLogin, function(req, res, next) {
 // List all run configurations of a user
 app.get('/privateservices/run-configurations', function(req, res){
   var requesterEmail = req.user.emails[0].value ;
-  console.log('asking run conf list for ' + requesterEmail);
+  //console.log('asking run conf list for ' + requesterEmail);
   db.collection('run-configurations').find({"owner" : requesterEmail}).toArray(function(err, result) {
     if (err) {
       throw err;
@@ -336,7 +343,7 @@ app.get('/privateservices/run-configurations', function(req, res){
 app.get('/privateservices/run-configurations/delete', function(req, res){
   var requesterEmail = req.user.emails[0].value ;
   var runId = req.query.runId ;
-  console.log('asking run conf delete for ' + requesterEmail + ' for run ' + runId );    
+  //console.log('asking run conf delete for ' + requesterEmail + ' for run ' + runId );    
   var condition = {"_id" : new ObjectId(runId), "owner" : requesterEmail};
 /*  db.collection('run-configurations').find(condition).toArray(function(err, result) {
     if (err) {
@@ -350,6 +357,7 @@ app.get('/privateservices/run-configurations/delete', function(req, res){
 });
 
 // add a co-owner to a run configuration
+/*
 app.get('/privateservices/run-configurations/add-co-owner', function(req, res){
   var requesterEmail = req.user.emails[0].value ;
   var coOwnerEmail = req.query.coOwnerEmail ;
@@ -357,8 +365,88 @@ app.get('/privateservices/run-configurations/add-co-owner', function(req, res){
   console.log('asking co-owner add for ' + requesterEmail + ' for run ' + runId + ' for co-owner ' + coOwnerEmail );
   res.send(coOwnerEmail + "add as co-owner");
 });
+*/
+
+// upload a run configuration
+function RunConf(owner, website, description, journey){
+  this.owner = owner ;
+  this.website = website ;
+  this.description = description ;
+  this.journey = journey ;
+}
+function PageConf(url, events) {
+  this.url = url;
+  this.events = events;
+}
+function runconf2json(runconf){
+  var output = new Array();
+  output["owner"] = runconf.owner ;
+  output["website"] = runconf.website ;
+  output["description"] = runconf.description ;
+  output["journey"] = runconf.journey ;
+  return JSON.stringify(output);
+}
+app.post('/privateservices/run-configurations/upload', function(req, res) {
+  var requesterEmail = req.user.emails[0].value ;
+  var website = req.body.website ;
+  var description = req.body.description ;
+  var runFile;
+ 
+  if (!req.files) {
+    res.redirect('/private/dropzonev2.html');
+    return;
+  }
+ 
+  // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file 
+  runFile = req.files.runConfigurationFile;
+  //console.log(runFile);
+ 
+  // Use the mv() method to place the file somewhere on your server 
+  var filePath = path.join(__dirname, '..', '/uploaded_files/', runFile.name) ;
+  // check if other file with same name already exists
+  runFile.mv(filePath, function(err) {
+    if (err) {
+      console.log(err);
+      res.status(500).send(err);
+    }
+    else {
+     // res.send('File uploaded!');
+      // Parse the file to generate the configuration
+      //var runConf = new Array();
+      var workbook = new Excel.Workbook();
+      workbook.xlsx.readFile(filePath)
+        .then(function() {
+          var journey = new Array();
+          var worksheet = workbook.getWorksheet(1);
+          //console.log(worksheet.getCell('A1').value);
+          var dobCol = worksheet.getColumn('A');
+          // iterate over all current cells in this column 
+          dobCol.eachCell(function(cell, rowNumber) {
+              //console.log(cell.value);
+              var pageConf = new PageConf(cell.value, {});
+              journey.push(pageConf);
+          });
+          var runConf = new RunConf(requesterEmail, website, description, journey) ;
+          var runConfJson = runconf2json(runConf);
+          console.log(runConf);
+          res.redirect('/private/run-configurations.html');
+          //console.log(runConfJson);
+          // Delete file
+          fs.unlinkSync(filePath);
+          // Store the configuration in the database
+          db.collection('run-configurations').insert(runConf, function(err, records) {
+            if (err) throw err;
+            console.log("record added");
+            //console.log("Record added as "+records[0]._id);
+          });
+        });
+    }
+  });
+});
+
 
 // see summary of run statuses of a user
+/*
 app.get('/privateservices/runs', function(req, res){
   var requesterEmail = req.user.emails[0].value ;
   console.log('asking run statuses list for ' + requesterEmail);
@@ -369,6 +457,7 @@ app.get('/privateservices/runs', function(req, res){
     res.send(result);
   });
 });
+*/
 
 // delete a run
 app.get('/privateservices/runs/delete', function(req, res){
@@ -376,6 +465,18 @@ app.get('/privateservices/runs/delete', function(req, res){
   var runId = req.query.runId ;
   console.log('asking run delete for ' + requesterEmail + ' for run ' + runId );
   res.send("done");
+});
+
+//execute a run
+app.get('/privateservices/run', function(req, res){
+  var requesterEmail = req.user.emails[0].value ;
+  console.log('asking run statuses list for ' + requesterEmail);
+  db.collection('runs').find({"owner" : requesterEmail}).toArray(function(err, result) {
+    if (err) {
+      throw err;
+    }
+    res.send(result);
+  });
 });
 
 
@@ -387,14 +488,11 @@ app.get('/privateservices/runs/delete', function(req, res){
 module.exports = app;
 
 
-
 // Déclaration des variables que j'utilise pour les ws
 
 global.runList = [];
 global.runOutputs = [];
 global.authorizedUsers = [];
-
-
-console.log('variables declared');
+//console.log('variables declared');
 
 

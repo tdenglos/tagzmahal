@@ -12,7 +12,9 @@
 
     <p></p>
 
-    <center><a href='/private/home'><img class="logo" src='./tagzmahal_logo.png' height='40px'></a></center>
+    <center><a href='/private/home.html'><img class="logo" src='./tagzmahal_logo.png' height='40px'></a>
+      <br><a href="/logout" id="logout">Logout</a>
+    </center>
 
     <main class="login container" style="padding-top: 10px;">
       
@@ -30,8 +32,8 @@
             <tr>
               <th>Owner</th>
               <th>Website</th>
-              <th>Name</th>
-              <th>See</th>
+              <th>Description</th>
+              <th>Run</th>
               <th>Delete</th>
             </tr>
           </table>
@@ -106,7 +108,7 @@
 
 
               function drawTable(data) {
-                  var header = $("<tr><th>Owner</th><th>Website</th><th>Name</th><th>See</th><th>Delete</th></tr>");
+                  var header = $("<tr><th>Owner</th><th>Website</th><th>Description</th><th>Run</th><th>Delete</th></tr>");
                   $("#dashboardTable").append(header);
                   for (var i = 0; i < data.length; i++) {
                       drawRow(data[i]);
@@ -118,7 +120,7 @@
                   $("#dashboardTable").append(row); //this will append tr element to table... keep its reference for a while since we will add cels into it
                   row.append($("<td>" + rowData.owner + "</td>"));
                   row.append($("<td>" + rowData.website + "</td>"));
-                  row.append($("<td>" + rowData.name + "</td>"));
+                  row.append($("<td>" + rowData.description + "</td>"));
                   row.append($("<td>" + "See" + "</td>"));
                   var id = rowData._id;
                   var deleteLink = "<a onclick='deleteRunConf(\""
