@@ -90,7 +90,7 @@
               }
 
               function deleteRunConf(id){
-                  console.log("deleting run");
+                console.log("deleting run");
                  var data = $.param({
                       runId: id
                   });         
@@ -100,6 +100,22 @@
                       }
                   };
                   $.get('/privateservices/run-configurations/delete', data, config)
+                    .success(function (data) {
+                    }).error(function (data, status, header, config) {
+                  });   
+              }
+
+              function run(id){
+                console.log("launching run");
+                 var data = $.param({
+                      runId: id
+                  });         
+                  var config = {
+                      headers : {
+                          'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
+                      }
+                  };
+                  $.get('/privateservices/run', data, config)
                     .success(function (data) {
                     }).error(function (data, status, header, config) {
                   });   
@@ -116,16 +132,20 @@
               }
 
               function drawRow(rowData) {
+                  var id = rowData._id;
+                  var runLink = "<a onclick='run(\""
+                      + id
+                      + "\")' href=''>Run</a>"  ;
+                  var deleteLink = "<a onclick='deleteRunConf(\""
+                      + id
+                      + "\")' href=''>Delete</a>"  ;
+
                   var row = $("<tr />")
                   $("#dashboardTable").append(row); //this will append tr element to table... keep its reference for a while since we will add cels into it
                   row.append($("<td>" + rowData.owner + "</td>"));
                   row.append($("<td>" + rowData.website + "</td>"));
                   row.append($("<td>" + rowData.description + "</td>"));
-                  row.append($("<td>" + "See" + "</td>"));
-                  var id = rowData._id;
-                  var deleteLink = "<a onclick='deleteRunConf(\""
-                      + id
-                      + "\")' href=''>Delete</a>"  ;
+                  row.append($("<td>" + runLink + "</td>"));
                   row.append($("<td>" + deleteLink + "</td>"));
               }
 

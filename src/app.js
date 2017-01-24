@@ -467,15 +467,23 @@ app.get('/privateservices/runs/delete', function(req, res){
   res.send("done");
 });
 
-//execute a run
+// Add run to queue
 app.get('/privateservices/run', function(req, res){
   var requesterEmail = req.user.emails[0].value ;
-  console.log('asking run statuses list for ' + requesterEmail);
-  db.collection('runs').find({"owner" : requesterEmail}).toArray(function(err, result) {
-    if (err) {
-      throw err;
-    }
-    res.send(result);
+  var runId = req.query.runId ;
+  function QueueElement(requester, runId){
+    this.requester = requester ;
+    this.runId = runId ;
+  }
+  var queueElement = new Array();
+  queueElement.push(new QueueElement(requesterEmail, runId));
+  console.log('asking execution for run from ' + requesterEmail);
+  console.log(queueElement);
+  db.collection('run-queue').insert(queueElement, function(err, records) {
+    if (err) throw err;
+    console.log("run added in queue");
+    res.send('done');
+    //console.log("Record added as "+records[0]._id);
   });
 });
 
