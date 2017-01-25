@@ -84,14 +84,16 @@ for (tag in tags){
 // ###################################
 // Initialisation du fichier d'output
 // ###################################
-var outputString ="";
+var outputString ="sep=,\n";
 //var outputFileName = run + '_' + Date.now() + '.' + outputType ;
 //var outputPath = localWorkspacePath + outputFileName ;
 //var outputStream = fs.open(outputPath, 'w');
 var columns = 'URL' 
 			+ ',' 
 			+ 'Tag'
-			+ ',' 
+			+ ','
+//			+ 'Occurence'
+//			+ ',' 
 			+ 'Hit'
 			+ ','
 			+ 'Parameter'
@@ -130,7 +132,7 @@ function manageHitRequest(request){
 			var hitUrl = request.url ;
 			//console.log(hitUrl);
 			//var ref = request.headers[0].value ;
-			var ref = urlList[counter].url;
+			var ref = urlList[refCounter].url;
 			//console.log(ref);
 
 			
@@ -168,28 +170,47 @@ function manageHitRequest(request){
 
 			}
 
+		  	var url = ref;
+		  	var tag = name;
+		  	var hit = hitUrl;
+		  	console.log(hit);
+
+
+			outputString += url
+						+ ','
+						+ tag
+						+ ','
+//		  				+ occurence
+//		  				+ ',' 						
+						+ hit
+						+ ',,\n' ;
+
+
+
 			for(var k in hitParams){
-			  	var url = ref;
-			  	var tag = name;
-			  	var hit = hitUrl;
+
 			  	var param = k;
+			  	//console.log(param);
 			  	var value = hitParams[k];
+			  	//console.log(value);
 			  	var content = url 
 			  				+ ',' 
 			  				+ tag
 			  				+ ',' 
+//			  				+ occurence
+//			  				+ ',' 
 			  				+ hit
 			  				+ ','
 			  				+ k
 			  				+ ','
 			  				+ value
 			  				;
-				console.log(content);
+				//console.log(content);
 				outputString += content + "\n" ;
 				//outputJson.push();
 			  	//outputStream.write(content+'\n');
 
-			}			
+			}
 
 		}
 	}		
@@ -261,10 +282,10 @@ function handlePage(pPage, pUrl){
 						pPage.render(renderPath);
 					}
 
-					
+					counter++;
 	 				//console.log('Progress: ' + Math.round(100*(counter / urlList.length)) + '%');
 
-					if (counter +1 === urlList.length){
+					if (counter  === urlList.length){
 						pPage.close();
 						//console.log('page closed: '+ pUrl);					
 					//	outputStream.close();
@@ -283,7 +304,7 @@ function handlePage(pPage, pUrl){
 						phantom.exit();
 					
 					} else {
-						counter++;
+						refCounter++;
 						handlePage(pPage, urlList[counter]);	
 					}
 					
@@ -306,6 +327,8 @@ function handlePage(pPage, pUrl){
 // ###################################
 
 var counter = 0 ;
+var refCounter = 0;
+var occurence = 0;
 
 var outputJson = new Array();
 //outputJson.push("toto");
