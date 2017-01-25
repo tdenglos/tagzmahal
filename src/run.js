@@ -130,7 +130,7 @@ function manageHitRequest(request){
 			var hitUrl = request.url ;
 			//console.log(hitUrl);
 			//var ref = request.headers[0].value ;
-			var ref = urlList[counter];
+			var ref = urlList[counter].url;
 			//console.log(ref);
 
 			
