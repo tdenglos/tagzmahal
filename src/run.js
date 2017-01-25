@@ -261,10 +261,10 @@ function handlePage(pPage, pUrl){
 						pPage.render(renderPath);
 					}
 
-					counter++;
+					
 	 				//console.log('Progress: ' + Math.round(100*(counter / urlList.length)) + '%');
 
-					if (counter === urlList.length){
+					if (counter +1 === urlList.length){
 						pPage.close();
 						//console.log('page closed: '+ pUrl);					
 					//	outputStream.close();
@@ -283,8 +283,10 @@ function handlePage(pPage, pUrl){
 						phantom.exit();
 					
 					} else {
+						counter++;
 						handlePage(pPage, urlList[counter]);	
 					}
+					
 
 
 	  		    },pageLoadTimeOut)	;
