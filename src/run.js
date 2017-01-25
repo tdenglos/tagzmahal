@@ -129,7 +129,8 @@ function manageHitRequest(request){
 			//console.log('Request ' + JSON.stringify(request, undefined, 4));	
 			var hitUrl = request.url ;
 			//console.log(hitUrl);
-			var ref = request.headers[0].value ;
+			//var ref = request.headers[0].value ;
+			var ref = urlList[counter];
 			//console.log(ref);
 
 			
