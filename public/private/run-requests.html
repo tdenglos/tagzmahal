@@ -23,17 +23,19 @@
         <div class="col-12 col-6-tablet push-3-tablet col-4-desktop push-4-desktop text-center">
 -->
       <div class="text-center" style="margin: 10px">
-          <h1 class="font-100">Run configurations</h1>
+          <h1 class="font-100">Run requests & Results</h1>
+          (Newest at bottom)
 
-          <br>
+          <br><br>
 
 
           <table id="dashboardTable">
             <tr>
-              <th>Owner</th>
+              <th>Requester</th>
               <th>Website</th>
               <th>Description</th>
-              <th>Run</th>
+              <th>Status</th>
+              <th>Result</th>
               <th>Delete</th>
             </tr>
           </table>
@@ -59,7 +61,7 @@
                           'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
                       }
                   };
-                  $.get('/privateservices/run-configurations', data, config)
+                  $.get('/privateservices/runs', data, config)
                     .success(function (data) {
 
                       for (var k in data){
@@ -81,7 +83,7 @@
               window.onload=function()
               {
                 refreshDashboard();
-                //setInterval('refreshDashboard()',30000);
+                setInterval('refreshDashboard()',1000);
               };
 
               function clearText(element){
@@ -89,44 +91,27 @@
 
               }
 
-              function deleteRunConf(id){
+
+
+              function deleteRunResult(id){
                 console.log("deleting run");
                  var data = $.param({
-                      runId: id
+                      _id: id
                   });         
                   var config = {
                       headers : {
                           'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
                       }
                   };
-                  $.get('/privateservices/run-configurations/delete', data, config)
+                  $.get('/privateservices/run-result/delete', data, config)
                     .success(function (data) {
                     }).error(function (data, status, header, config) {
                   });   
               }
-
-              function run(id, website, description){
-                console.log("launching run");
-                 var data = $.param({
-                      runId: id,
-                      website: website,
-                      description: description
-                  });         
-                  var config = {
-                      headers : {
-                          'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
-                      }
-                  };
-                  $.post('/privateservices/run', data, config)
-                    .success(function (data) {
-                    }).error(function (data, status, header, config) {
-                  });   
-              }
-
 
 
               function drawTable(data) {
-                  var header = $("<tr><th>Owner</th><th>Website</th><th>Description</th><th>Run</th><th>Delete</th></tr>");
+                  var header = $("<tr><th>Requester</th><th>Website</th><th>Description</th><th>Status</th><th>Result</th><th>Delete</th></tr>");
                   $("#dashboardTable").append(header);
                   for (var i = 0; i < data.length; i++) {
                       drawRow(data[i]);
@@ -134,22 +119,29 @@
               }
 
               function drawRow(rowData) {
-                  var id = rowData._id ;
-                  var website = rowData.website ;
-                  var description = rowData.description ;
-                  var owner = rowData.owner ;
-                  var runLink = "<a onclick='run(\""
-                      + id + "\", \"" + website + "\", \"" + description
-                      + "\")' href=''>Run</a>"  ;
-                  var deleteLink = "<a onclick='deleteRunConf(\""
-                      + id 
-                      + "\")' href=''>Delete</a>"  ;
+                  
+                  var runLink ;
+                  if (rowData.status == "Done"){
+                    runLink = "<a href='/privateservices/run-result?_id=" + rowData._id +"\' >See</a>"  ;
+                  }else{
+                    runLink = "..." ;
+                  }
+                  
+                  var deleteLink ;
+                  if (rowData.status == "Done"){
+                    var deleteLink = "<a onclick='deleteRunResult(\""
+                        + rowData._id 
+                        + "\")' href=''>Delete</a>"  ;
+                  }else{
+                   deleteLink = "..." ; 
+                  }
 
                   var row = $("<tr />")
                   $("#dashboardTable").append(row); //this will append tr element to table... keep its reference for a while since we will add cels into it
-                  row.append($("<td>" + rowData.owner + "</td>"));
+                  row.append($("<td>" + rowData.requester + "</td>"));
                   row.append($("<td>" + rowData.website + "</td>"));
                   row.append($("<td>" + rowData.description + "</td>"));
+                  row.append($("<td>" + rowData.status + "</td>"));
                   row.append($("<td>" + runLink + "</td>"));
                   row.append($("<td>" + deleteLink + "</td>"));
               }

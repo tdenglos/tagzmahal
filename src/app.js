@@ -46,6 +46,26 @@ MongoClient.connect('mongodb://tagzmahal-app:tagzmahal-app@ds117199.mlab.com:171
     console.log("beta testers :");
     console.log(result);
   });
+
+  var condition = {"status" : "Running"};
+  var update = {"status" : "Queued"} ;
+  db.collection('run-queue').update(condition, { $set: update }, {multi: true},function(err, result){
+    if (err){
+      throw err;
+    }
+
+    db.collection('run-queue').find().toArray(function(err, result) {
+      if (err) {
+        throw err;
+      }
+      console.log("runs in queue :");
+      console.log(result);
+      // Check run queue
+      checkQueue(goNogo);
+    });
+
+  });
+
 });
 
 ////// TEST AREA
@@ -327,6 +347,43 @@ app.all("/privateservices/*", requireLogin, function(req, res, next) {
 // SERVICES
 //////////////////////
 
+
+// Get run result
+app.get('/privateservices/run-result', function(req, res){
+  var requesterEmail = req.user.emails[0].value ;
+  console.log(req.query);
+  var condition = {"requester" : requesterEmail, "_id" : new ObjectId(req.query._id)};
+  db.collection('run-queue').find(condition).toArray(function(err, result) {
+    if (err) {
+      throw err;
+    }
+    console.log(result);
+    if(result[0].output){
+      var filePath = path.join(__dirname, '..', 'uploaded_files/tmp/', result[0].output) ;
+      res.sendFile(filePath);  
+    }else{
+      res.send("Not found");
+    }
+  });
+});
+
+// delete a run result
+app.get('/privateservices/run-result/delete', function(req, res){
+  var requesterEmail = req.user.emails[0].value ;
+  var id = req.query._id ;
+  //console.log('asking run conf delete for ' + requesterEmail + ' for run ' + runId );    
+  var condition = {"_id" : new ObjectId(id), "requester" : requesterEmail};
+/*  db.collection('run-configurations').find(condition).toArray(function(err, result) {
+    if (err) {
+      throw err;
+    }
+    console.log(result);
+    res.send(result);
+  }); */
+  db.collection('run-queue').deleteOne(condition);
+  res.send("done");
+});
+
 // List all run configurations of a user
 app.get('/privateservices/run-configurations', function(req, res){
   var requesterEmail = req.user.emails[0].value ;
@@ -368,15 +425,22 @@ app.get('/privateservices/run-configurations/add-co-owner', function(req, res){
 */
 
 // upload a run configuration
-function RunConf(owner, website, description, journey){
+function RunConf(owner, website, description, journey, tags){
   this.owner = owner ;
   this.website = website ;
   this.description = description ;
   this.journey = journey ;
+  this.tags = tags
 }
 function PageConf(url, events) {
   this.url = url;
   this.events = events;
+}
+function Tag(name, url, splitChar1, splitChar2) {
+  this.name = name;
+  this.url = url;
+  this.splitChar1 = splitChar1;
+  this.splitChar2 = splitChar2;
 }
 function runconf2json(runconf){
   var output = new Array();
@@ -384,6 +448,7 @@ function runconf2json(runconf){
   output["website"] = runconf.website ;
   output["description"] = runconf.description ;
   output["journey"] = runconf.journey ;
+  output["tags"] = runconf.tags ;
   return JSON.stringify(output);
 }
 app.post('/privateservices/run-configurations/upload', function(req, res) {
@@ -393,7 +458,7 @@ app.post('/privateservices/run-configurations/upload', function(req, res) {
   var runFile;
  
   if (!req.files) {
-    res.redirect('/private/dropzonev2.html');
+    res.redirect('/private/configure-new-run.html');
     return;
   }
  
@@ -416,17 +481,46 @@ app.post('/privateservices/run-configurations/upload', function(req, res) {
       var workbook = new Excel.Workbook();
       workbook.xlsx.readFile(filePath)
         .then(function() {
+          
           var journey = new Array();
-          var worksheet = workbook.getWorksheet(1);
+          var worksheet_journey = workbook.getWorksheet("journey");
           //console.log(worksheet.getCell('A1').value);
-          var dobCol = worksheet.getColumn('A');
+          var dobCol = worksheet_journey.getColumn('A');
           // iterate over all current cells in this column 
           dobCol.eachCell(function(cell, rowNumber) {
               //console.log(cell.value);
-              var pageConf = new PageConf(cell.value, {});
-              journey.push(pageConf);
+              if(rowNumber!=1){
+                var pageConf = new PageConf(cell.value, {});
+                journey.push(pageConf);
+              }
           });
-          var runConf = new RunConf(requesterEmail, website, description, journey) ;
+
+          var tags = new Array();
+          var worksheet_tags = workbook.getWorksheet("tags");
+          //console.log(worksheet.getCell('A1').value);
+          var dobCol = worksheet_tags.getColumn('A');
+          // iterate over all current cells in this column 
+          var row = 1;
+          var coords = new Array();
+          dobCol.eachCell(function(cell, rowNumber) {
+              //console.log(cell.value);
+              if(row > 1){
+                coords["name"] = "A" + row ;
+                coords["url"] = "B" + row ;
+                coords["splitChar1"] = "C" + row ;
+                coords["splitChar2"] = "D" + row ;
+                var tag = new Tag(
+                  worksheet_tags.getCell(coords["name"]).value, 
+                  worksheet_tags.getCell(coords["url"]).value,
+                  worksheet_tags.getCell(coords["splitChar1"]).value,
+                  worksheet_tags.getCell(coords["splitChar2"]).value
+                );
+                tags.push(tag);
+              }
+              row++;
+          });
+          
+          var runConf = new RunConf(requesterEmail, website, description, journey, tags) ;
           var runConfJson = runconf2json(runConf);
           console.log(runConf);
           res.redirect('/private/run-configurations.html');
@@ -446,18 +540,17 @@ app.post('/privateservices/run-configurations/upload', function(req, res) {
 
 
 // see summary of run statuses of a user
-/*
 app.get('/privateservices/runs', function(req, res){
   var requesterEmail = req.user.emails[0].value ;
-  console.log('asking run statuses list for ' + requesterEmail);
-  db.collection('runs').find({"owner" : requesterEmail}).toArray(function(err, result) {
+  //console.log('asking run statuses list for ' + requesterEmail);
+  db.collection('run-queue').find({"requester" : requesterEmail}).toArray(function(err, result) {
     if (err) {
       throw err;
     }
     res.send(result);
   });
 });
-*/
+
 
 // delete a run
 app.get('/privateservices/runs/delete', function(req, res){
@@ -468,29 +561,235 @@ app.get('/privateservices/runs/delete', function(req, res){
 });
 
 // Add run to queue
-app.get('/privateservices/run', function(req, res){
+app.post('/privateservices/run', function(req, res){
   var requesterEmail = req.user.emails[0].value ;
-  var runId = req.query.runId ;
-  function QueueElement(requester, runId){
+  var runId = req.body.runId ;
+  var website = req.body.website ;
+  var description = req.body.description ;
+  function QueueElement(requester, runId, website, description, status){
     this.requester = requester ;
     this.runId = runId ;
+    this.website = website ;
+    this.description = description ;
+    this.status = status ;
   }
   var queueElement = new Array();
-  queueElement.push(new QueueElement(requesterEmail, runId));
+  var status = "Queued" ;
+  queueElement.push(new QueueElement(requesterEmail, runId, website, description, status));
   console.log('asking execution for run from ' + requesterEmail);
   console.log(queueElement);
   db.collection('run-queue').insert(queueElement, function(err, records) {
     if (err) throw err;
     console.log("run added in queue");
     res.send('done');
+    checkQueue(goNogo);
     //console.log("Record added as "+records[0]._id);
   });
 });
 
 
+//////////////////////
+// RUN
+//////////////////////
+
+function navigate(runRequest, filePath){
+  var runLogs ='';
+  console.log('Launching phantomjs run...');
+  const spawn = require('child_process').spawn;
+  const ls = spawn('phantomjs', ['src/run.js', filePath]);
+  /*
+  ls.stdout.on('data', function(data){
+    console.log(data);
+  });
+*/
+  
+  ls.stdout.on('data', (data) => {
+    console.log(`${data}`);
+    runLogs += `${data}`;
+  });
+  
+  ls.on('close', (code) => {
+    console.log(`child process exited with code ${code}`);
+   /*
+    var newRun = {
+      id: runRequest._id,
+      output: runLogs
+    };
+    */
+  var outputFilePath = filePath.split(".")[0] + "_output.csv";
+  deleteFromQueue(runRequest, outputFilePath);
+  deleteJsonFromFs(filePath);
+  //console.log(newRun);
+  });
+}
+
+
+function createXlsx(runRequest, filePath){
+/*
+ console.log("creating xlsx");
+ var outputPath = path.join(__dirname, '..', 'run_results/', runRequest._id, ".xlsx");
+  fs.readFile(filePath, (err, data) => {
+    if (err) throw err;
+    //console.log(data);
+    
+    // create xlsx
+    
+    deleteJsonFromFs(filePath);
+    setRunOutput(runRequest, outputFilePath);
+    
+  });
+
+*/
+// Temorary solution
+var fileName = filePath.replace(/^.*[\\\/]/, '');
+setRunOutput(runRequest, fileName);
+
+}
+
+
+function setRunOutput(runRequest,fileName){
+  var condition = {"_id" : new ObjectId(runRequest._id)};
+  var update = {$set: {"output" : fileName}} ;
+  var options = {upsert: false, multi: false} ;
+  db.collection('run-queue').update(condition, update, function(err, result) {
+    if (err) {
+      throw err;
+    }
+    setStatus(runRequest, "Done", "", function(){});
+    checkQueue(goNogo);
+  });
+}
+
+
+function writeJsonOnFs(runRequest){
+  db.collection('run-configurations').find({"owner" : runRequest.requester, "_id" : new ObjectId(runRequest.runId)}).toArray(function(err, result) {
+    if (err) {
+      throw err;
+    }
+    console.log(result[0]);
+    console.log(JSON.stringify(result[0]));
+    var key = Date.now() ;
+    var filename = runRequest._id + "_" + key + ".json" ;
+    var filePath = path.join(__dirname, '..', 'uploaded_files/tmp/', filename) ;
+    fs.writeFile(filePath, JSON.stringify(result[0]), function(err) {
+      if(err) {
+          return console.log(err);
+      }
+      console.log("The file was saved!"); 
+      navigate(runRequest, filePath);
+    });
+  });
+}
+
+
+function deleteJsonFromFs(filePath){
+        // Delete file
+        fs.unlinkSync(filePath);
+}
+
+
+function deleteFromQueue(runRequest, path){
+  activeRuns-- ;
+  console.log(activeRuns);
+  setStatus(runRequest, "Finishing",  path, createXlsx);
+
+/*
+  var condition = {"_id" : new ObjectId(runRequest._id)};
+  db.collection('run-queue').deleteOne(condition, function(err){
+    if (err){
+      throw err ;
+    }
+    checkQueue(goNogo);
+  });
+*/
+}
+
+function run(runRequest,path){
+  console.log("running");
+  console.log(runRequest);
+
+  // Set run as on-going
+  // Start run
+  // Remove from queue and add to run-results
+  // Decrement active runs
+  
+  writeJsonOnFs(runRequest);
+
+  /*
+  var i = Math.floor(Math.random() * (15 - 3 + 1) + 3);
+  setTimeout(function() {
+
+  }, i*1000);
+*/
+}
+
+
 
 //////////////////////
-// LAUNCH
+// RUN LAUNCHER
+//////////////////////
+
+
+
+var maxActiveRuns = 1 ;
+var activeRuns = 0 ;
+
+
+// Check run queue
+function checkQueue(callback){
+   var condition = {"status" : "Queued"} ;
+   db.collection('run-queue').find(condition).toArray(function(err, runsInQueue) {
+    if (err) {
+      throw err;
+    }
+    callback(runsInQueue);
+  });
+}
+
+
+// Set run request status
+function setStatus(runRequest, status, path, callback){
+  var condition = {"_id" : new ObjectId(runRequest._id)};
+  var update = {$set: {"status" : status}} ;
+  var options = {upsert: false, multi: false} ;
+  db.collection('run-queue').update(condition, update, function(err, result) {
+    if (err) {
+      throw err;
+    }
+    runRequest.status = status ;
+    callback(runRequest, path);
+  });
+}
+
+
+// Hold or run
+function goNogo(queue) {
+  console.log(queue.length + ' runs in queue');
+  console.log(activeRuns + ' runs running');
+  // if I have something to do and room to do it
+  if (queue.length > 0 && activeRuns < maxActiveRuns){
+    // Build an array of runs I can handle
+    var i = Math.min(queue.length, maxActiveRuns - activeRuns) ;
+    var runsToLaunch = new Array();
+    for (var x = 0; x < i; x++){
+      activeRuns++;
+      runsToLaunch[x] = queue[x];
+    }
+    console.log("Runs to launch:");
+    console.log(runsToLaunch);
+    setStatus(runsToLaunch[0], "Running", "", run);
+
+  }else{
+    console.log("Run stack is full or queue is empty");
+  }
+ 
+}
+
+
+
+
+//////////////////////
+// APPLICATION LAUNCH
 //////////////////////
 
 module.exports = app;
@@ -504,3 +803,4 @@ global.authorizedUsers = [];
 //console.log('variables declared');
 
 
+  
