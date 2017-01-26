@@ -13,7 +13,7 @@ var screenshot = false ;
 var screenSize = { width: 1920, height: 1080 };
 
 // Temps de chargement des pages prévu
-var pageLoadTimeOut = 1000 ;
+var pageLoadTimeOut = 2500 ;
 
 /*
 // Configuration xiti
