@@ -245,9 +245,10 @@ function handlePage(pPage, pUrl){
 		if (status !== 'success') {
 	    	
 	    	console.log('FAIL to load the address: ' + pUrl);
-	    	counter++;
+
 	    	//console.log('Progress: ' + Math.round(100*(counter / urlList.length)) + '%');
-	    	handlePage(pPage, urlList[counter]);
+	    //	handlePage(pPage, urlList[counter]);
+	    	handleNext(pPage);
 	  	
 	  	} else {
 
@@ -270,48 +271,22 @@ function handlePage(pPage, pUrl){
 //			pPage.onLoadFinished = function() {
 
 
-			    setTimeout(function(){
-		            
-		            //console.log("that's long enough");
-         			
-         			// Screenshot
-					if (screenshot){
-						strongUrl = pUrl.replace(/\//gm, '_').replace(/:/gm ,'_');
-						//console.log(strongUrl);
-						var renderPath = localWorkspacePath + '/screenshots/' + strongUrl + '.png' ;
-						pPage.render(renderPath);
-					}
+		    setTimeout(function(){
+	            
+	            //console.log("that's long enough");
+     			
+     			// Screenshot
+				if (screenshot){
+					strongUrl = pUrl.replace(/\//gm, '_').replace(/:/gm ,'_');
+					//console.log(strongUrl);
+					var renderPath = localWorkspacePath + '/screenshots/' + strongUrl + '.png' ;
+					pPage.render(renderPath);
+				}
 
-					counter++;
-	 				//console.log('Progress: ' + Math.round(100*(counter / urlList.length)) + '%');
+				handleNext(pPage);
 
-					if (counter  === urlList.length){
-						pPage.close();
-						//console.log('page closed: '+ pUrl);					
-					//	outputStream.close();
-						//console.log(outputString);
-					    filePath = filePath.split(".")[0] + "_output.csv" ;
-					    console.log(filePath);
-					    fs.write(filePath, outputString, 'w');
-					    /*
-					    fs.writeFile(filePath, JSON.stringify(outputJson), function(err) {
-							if(err) {
-          						return console.log(err);
-  							}
-      						console.log("The file was saved!"); 
-    					});
-*/
-						phantom.exit();
-					
-					} else {
-						refCounter++;
-						handlePage(pPage, urlList[counter]);	
-					}
-					
-
-
-	  		    },pageLoadTimeOut)	;
-				//console.log('rendered: ' + renderPath) ;
+  		    },pageLoadTimeOut)	;
+			//console.log('rendered: ' + renderPath) ;
 //			};
 
 		}
@@ -320,6 +295,38 @@ function handlePage(pPage, pUrl){
 
 }
 
+
+function handleNext(pPage){
+
+
+	counter++;
+		//console.log('Progress: ' + Math.round(100*(counter / urlList.length)) + '%');
+
+	if (counter  === urlList.length){
+		pPage.close();
+		//console.log('page closed: '+ pUrl);					
+	//	outputStream.close();
+		//console.log(outputString);
+	    filePath = filePath.split(".")[0] + "_output.csv" ;
+	    console.log(filePath);
+	    fs.write(filePath, outputString, 'w');
+	    /*
+	    fs.writeFile(filePath, JSON.stringify(outputJson), function(err) {
+			if(err) {
+					return console.log(err);
+				}
+				console.log("The file was saved!"); 
+		});
+*/
+		phantom.exit();
+	
+	} else {
+		refCounter++;
+		handlePage(pPage, urlList[counter]);	
+	}
+
+
+}
 
 
 // ###################################
