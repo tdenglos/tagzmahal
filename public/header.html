@@ -1,0 +1,131 @@
+
+    <link rel="stylesheet" href="//cdn.rawgit.com/feathersjs/feathers-chat/v0.1.0/public/base.css">
+    <link rel="stylesheet" href="//cdn.rawgit.com/feathersjs/feathers-chat/v0.1.0/public/chat.css">
+    <script src="https://code.jquery.com/jquery-1.10.1.min.js"></script>
+
+<center>
+
+  <div style="padding-top: 20px;">
+  <!--<div style="padding-top: 20px; background-image: url(../bg.png);background-repeat: no-repeat;  background-position: center;">-->
+    <img class="logo" src='/tagzmahal_logo.png' height='40px'>
+      <br>
+      <div>
+        <!--<a href="/private/help.html" id="help">Help</a> - -->
+        <a href="/logout" id="logout">Logout</a>
+      </div>
+      <br><br>
+  </div>
+  
+
+
+  <script>
+
+    var navList = [
+ /*     {
+        "label": "Help",
+        //"url": "/header.html"
+        "url": "/private/help.html"
+      },
+   */   {
+        "label": "1. Configure",
+        "url": "/private/configure-new-run.html"
+      },    
+      {
+        "label": "2. Run",
+        "url": "/private/run-configurations.html"
+      },
+      {
+        "label": "3. See results",
+        "url": "/private/run-requests.html"
+      }    
+    ];
+
+  </script>
+
+
+  <div id="nav"></div>
+
+  <style>
+
+    div.navItemInactive {
+        width: 33%; 
+        float:left; 
+        padding: 5px; 
+        border-width:1px; 
+        border-color:white; 
+        border-style:solid;
+        color: white;
+        background-color: #31d8a0;
+        border-radius: 0px; 
+    }
+    
+    div.navItemActive {
+        width: 33%; 
+        float:left; 
+        padding: 5px; 
+        border-width:1px; 
+        border-color:white; 
+        border-style:solid;
+        color: white;
+       background-color: #846304;
+       border-radius: 0px; 
+    }
+
+  </style>
+
+  <script>
+
+
+    function removeDomain(url) {
+        var noDomain="";
+        var minRank;
+        if (url.indexOf("://") > -1) {
+          minRank = 2;
+        }else {
+          minRank = 1;
+        }
+         //noDomain = url.split('/')[1];
+         //noDomain = url.split('/')[3];
+        var parts = url.split('/');
+        for (var rank in parts){
+          if (rank > minRank){
+            noDomain += "/" + parts[rank];
+          }
+        }
+        //find & remove port number
+        noDomain = noDomain.split('?')[0];
+        noDomain = noDomain.split('#')[0];
+        return noDomain;
+    }
+
+    console.log(removeDomain(window.location.href));
+
+    function setActiveNavItem(link){
+      if ( link == removeDomain(window.location.href) ){
+        return '<div class="navItemActive">';
+      }else{
+        return '<div class="navItemInactive">';
+      }
+    }
+
+
+    for (var navItem in navList){
+      var item = '<a href="' 
+        + navList[navItem].url 
+        + '">'
+        + setActiveNavItem(navList[navItem].url)
+        + navList[navItem].label
+        + '</div> </a>'
+
+      $("#nav").append(item);
+    }
+
+  </script>
+
+</center>
+
+
+
+
+
+

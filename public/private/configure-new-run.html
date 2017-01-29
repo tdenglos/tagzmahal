@@ -8,15 +8,17 @@
     <script src="https://code.jquery.com/jquery-1.10.1.min.js"></script>
   </head>
   
-  <body style="background-image: url(../bg.png);background-repeat: no-repeat;  background-position: center;"> 
+  <body> 
 
-    <p></p>
 
-    <center><a href='/private/home.html'><img class="logo" src='./tagzmahal_logo.png' height='40px'></a>
-      <br><a href="/logout" id="logout">Logout</a>
-    </center>
+    <div id="header"></div>
+    <script> 
+    $(function(){
+      $("#header").load("../header.html"); 
+    });
+    </script> 
 
-    <main class="login container" style="padding-top: 10px;">
+    <main class="login container" style="padding-top: 40px; padding-bottom: 0px;">
       
       <div class="row">
 <!--
@@ -40,10 +42,10 @@
         </div>
         <div style="background-color: white; margin-top: 30px; padding-top: 5px; padding-bottom: 2px; padding-left: 10px; padding-right: 10px;">
          <p><b>HELP </b></p>
-          <p>Your configuration file must be an xlsx file containing 2 tabs:</p>
+          <p>Your configuration file must be a .xlsx file containing 2 tabs:</p>
           <ul>
             <li><b>"journey":</b> list the URLs you want to analyze in colomn A, starting in A2.</li>
-            <li><b>"tags":</b> use columns A, B and C to define the tags you want to analyze (hit url incl. protocol, character used to separate URL from parameters, parameter separator). Leav row 1 for headers.</li>
+            <li><b>"tags":</b> use columns A, B and C to define the tags you want to analyze (hit url incl. protocol, character used to separate URL from parameters, parameter separator). Please leave row 1 for headers.</li>
           </ul>
 
           <p><a href='/private/tagzmahal-upload-example.xlsx'> >> DOWNLOAD AN EXAMPLE << </a></p>

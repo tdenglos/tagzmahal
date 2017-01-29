@@ -10,13 +10,14 @@
   
   <body> 
 
-    <p></p>
+    <div id="header"></div>
+    <script> 
+    $(function(){
+      $("#header").load("../header.html"); 
+    });
+    </script> 
 
-    <center><a href='/private/home.html'><img class="logo" src='./tagzmahal_logo.png' height='40px'></a>
-      <br><a href="/logout" id="logout">Logout</a>
-    </center>
-
-    <main class="login container" style="padding-top: 10px;">
+    <main class="login container" style="padding-top: 40px; padding-bottom: 0px;">
       
       <div class="row" >
 <!--

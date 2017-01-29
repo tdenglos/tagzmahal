@@ -33,7 +33,13 @@ const fs = require('fs');
 var MongoClient = require('mongodb').MongoClient;
 var ObjectId = require('mongodb').ObjectID;
 var db;
+
+// DEV
+//MongoClient.connect('mongodb://tagzmahal-app:tagzmahal-app@ds135069.mlab.com:35069/tagzmahal-beta-dev', function(err, database) {
+
+// PROD
 MongoClient.connect('mongodb://tagzmahal-app:tagzmahal-app@ds117199.mlab.com:17199/tagzmahal-beta', function(err, database) {
+
   if (err) {
     throw err;
   }
@@ -263,7 +269,7 @@ app.get('/auth/google/callback',
       //console.log(result);
       //console.log(result.length);
       if(result.length > 0){
-        res.redirect('/private/home.html');    
+        res.redirect('/private/configure-new-run.html');    
         //res.redirect('/successful_login.html');    
       }else{
         req.logout();

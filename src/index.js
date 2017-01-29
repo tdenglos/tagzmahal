@@ -9,8 +9,8 @@ const server = app.listen(port);
 
 https.createServer({
   //DEV
-  	//key: fs.readFileSync('key.pem'),
-  	//cert: fs.readFileSync('cert.pem')
+  //	key: fs.readFileSync('key.pem'),
+  //	cert: fs.readFileSync('cert.pem')
   //PROD
 	key: fs.readFileSync('key_name.key'),
 	cert: fs.readFileSync('tagzmahal-com.cer')
@@ -31,7 +31,7 @@ server.on('listening', () =>
 ////////////////////////////
 ////////////////////////////
 
-
+/*
 var Excel = require('exceljs');
 
 // read from a file 
@@ -53,4 +53,4 @@ workbook.xlsx.readFile('./src/middleware/input_short.xlsx')
 		    console.log(cell.value);
 		});
     });
-
+*/
