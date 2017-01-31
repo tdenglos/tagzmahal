@@ -490,6 +490,14 @@ app.post('/privateservices/run-configurations/upload', function(req, res) {
           
           var journey = new Array();
           var worksheet_journey = workbook.getWorksheet("journey");
+          var worksheet_tags = workbook.getWorksheet("tags");
+          
+          if (!worksheet_journey || !worksheet_tags){
+            res.send("Please name your tabs correctly.");
+            return;
+          }
+
+
           //console.log(worksheet.getCell('A1').value);
           var dobCol = worksheet_journey.getColumn('A');
           // iterate over all current cells in this column 
@@ -502,7 +510,7 @@ app.post('/privateservices/run-configurations/upload', function(req, res) {
           });
 
           var tags = new Array();
-          var worksheet_tags = workbook.getWorksheet("tags");
+
           //console.log(worksheet.getCell('A1').value);
           var dobCol = worksheet_tags.getColumn('A');
           // iterate over all current cells in this column 
@@ -587,7 +595,7 @@ app.post('/privateservices/run', function(req, res){
   db.collection('run-queue').insert(queueElement, function(err, records) {
     if (err) throw err;
     console.log("run added in queue");
-    res.send('done');
+    res.redirect('/private/run-requests.html');
     checkQueue(goNogo);
     //console.log("Record added as "+records[0]._id);
   });
