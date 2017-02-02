@@ -9,8 +9,8 @@ const server = app.listen(port);
 
 https.createServer({
   //DEV
-  //	key: fs.readFileSync('key.pem'),
-  //	cert: fs.readFileSync('cert.pem')
+  	//key: fs.readFileSync('key.pem'),
+  	//cert: fs.readFileSync('cert.pem')
   //PROD
 	key: fs.readFileSync('key_name.key'),
 	cert: fs.readFileSync('tagzmahal-com.cer')
